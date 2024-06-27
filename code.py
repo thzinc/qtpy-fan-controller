@@ -4,15 +4,23 @@ import neopixel
 import digitalio
 import pwmio
 
+MAX_FAN_DUTY_CYCLE = 0xAAAA
+FAN_PWM_FREQUENCY = 22_000
+
+COLOR_RED = (255, 0, 0)
+COLOR_YELLOW = (255, 255, 0)
+COLOR_GREEN = (0, 255, 0)
+COLOR_BLUE = (0, 0, 255)
+
 FAN_SPEEDS = [
-    {"pixel": (255, 0, 0), "duty_cycle": 0x0000},  # red, 0%
-    {"pixel": (255, 255, 0), "duty_cycle": 0x5555},  # yellow, 33%
-    {"pixel": (0, 255, 0), "duty_cycle": 0xAAAA},  # green, 67%
-    {"pixel": (0, 0, 255), "duty_cycle": 0xFFFF},  # blue, 100%
+    {"pixel": COLOR_RED, "duty_cycle_pct": 0.00},
+    {"pixel": COLOR_YELLOW, "duty_cycle_pct": 0.33},
+    {"pixel": COLOR_GREEN, "duty_cycle_pct": 0.66},
+    {"pixel": COLOR_BLUE, "duty_cycle_pct": 1.00},
 ]
 
 pixel = neopixel.NeoPixel(board.NEOPIXEL, 1)
-fan = pwmio.PWMOut(board.A2, frequency=22000)
+fan = pwmio.PWMOut(board.A2, frequency=FAN_PWM_FREQUENCY)
 button = digitalio.DigitalInOut(board.A0)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
@@ -20,7 +28,8 @@ button.pull = digitalio.Pull.UP
 
 def set_state(selected_fan_speed):
     pixel_fill = FAN_SPEEDS[selected_fan_speed]["pixel"]
-    fan_duty_cycle = FAN_SPEEDS[selected_fan_speed]["duty_cycle"]
+    duty_cycle_pct = FAN_SPEEDS[selected_fan_speed]["duty_cycle_pct"]
+    fan_duty_cycle = int(MAX_FAN_DUTY_CYCLE * duty_cycle_pct)
 
     print(f"Setting pixel to {pixel_fill}")
     pixel.fill(pixel_fill)
@@ -33,14 +42,17 @@ button_up = True
 fan_speed = 0
 set_state(fan_speed)
 
+
 while True:
-    if button.value != button_up:
-        button_up = button.value
+    button_value = button.value
+    if button_value != button_up:
+        button_up = button_value
 
         if button_up:
             print("button is released")
-            fan_speed = (fan_speed + 1) % len(FAN_SPEEDS)
-            set_state(fan_speed)
 
         else:
             print("button is pressed")
+            fan_speed = (fan_speed + 1) % len(FAN_SPEEDS)
+            set_state(fan_speed)
+            time.sleep(0.250)
