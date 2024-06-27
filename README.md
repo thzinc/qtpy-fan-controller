@@ -6,7 +6,7 @@ After a _second_ Levoit 131P "Smart True HEPA Air Purifier" died after a power f
 
 This is the breadboard I assembled to host the QT Py and control the fan. It's got a Schottky diode to protect the circuit from the motor backfeeding energy into the "clean" side of the circuit. It's also got a buck converter to bring the 24V input down to 5V for the QT Py.
 
-The code expects to use pin A0 for a momentary switch to select one a fan speed, and pin A2 for PWM signal to the fan motor.
+The code expects to use pin A0 for a momentary switch to select a fan speed, and pin A2 for PWM signal to the fan motor.
 
 ![Annotated circuit board](docs/circuit.jpg)
 
